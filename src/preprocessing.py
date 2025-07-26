@@ -80,15 +80,29 @@ class PDFPreprocessor:
         
         return text
     
-    """
-    Convenience function for complete financial data preprocessing.
-    
-    Args:
-        pdf_path: Path to the PDF file
-        chunk_size: Size of text chunks
+    def clean_text(self, text: str) -> str:
+        """
+        Clean and normalize extracted text.
         
-    Returns:
-        Processed data dictionary
-    """
-    preprocessor = PDFPreprocessor(chunk_size=chunk_size)
-    return preprocessor.process_pdf(pdf_path) 
+        Args:
+            text: Raw extracted text
+            
+        Returns:
+            Cleaned text
+        """
+        # Remove excessive whitespace
+        text = re.sub(r'\s+', ' ', text)
+        
+        # Remove special characters but keep important ones
+        text = re.sub(r'[^\w\s\.\,\-\$\%\(\)]', ' ', text)
+        
+        # Normalize whitespace
+        text = ' '.join(text.split())
+        
+        # Remove page numbers and headers/footers
+        text = re.sub(r'Page \d+ of \d+', '', text)
+        text = re.sub(r'\b\d+\s*of\s*\d+\b', '', text)
+        
+        return text.strip()
+    
+    
