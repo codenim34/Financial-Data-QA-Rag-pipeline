@@ -105,4 +105,60 @@ class PDFPreprocessor:
         
         return text.strip()
     
+    def create_chunks(self, text: str) -> List[str]:
+        """
+        Split text into overlapping chunks.
+        
+        Args:
+            text: Clean text to chunk
+            
+        Returns:
+            List of text chunks
+        """
+        chunks = []
+        start = 0
+        
+        while start < len(text):
+            end = start + self.chunk_size
+            
+            # Try to break at sentence boundaries
+            if end < len(text):
+                # Look for sentence endings near the chunk boundary
+                search_start = max(start, end - 100)
+                search_end = min(len(text), end + 100)
+                
+                # Find the last sentence boundary in the search area
+                last_period = text.rfind('.', search_start, end)
+                last_exclamation = text.rfind('!', search_start, end)
+                last_question = text.rfind('?', search_start, end)
+                
+                # Choose the latest sentence boundary
+                sentence_end = max(last_period, last_exclamation, last_question)
+                
+                if sentence_end > start:
+                    end = sentence_end + 1
+            
+            chunk = text[start:end].strip()
+            if chunk:
+                chunks.append(chunk)
+            
+            # Move start position with overlap
+            start = end - self.chunk_overlap
+            if start >= len(text):
+                break
+        
+        return chunks
     
+
+    """
+    Convenience function for complete financial data preprocessing.
+    
+    Args:
+        pdf_path: Path to the PDF file
+        chunk_size: Size of text chunks
+        
+    Returns:
+        Processed data dictionary
+    """
+    preprocessor = PDFPreprocessor(chunk_size=chunk_size)
+    return preprocessor.process_pdf(pdf_path) 
